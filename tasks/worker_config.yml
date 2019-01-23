@@ -1,0 +1,28 @@
+---
+# tasks file for master
+- name: Reset Kubernetes Master
+  shell: kubeadm reset -f
+  register: kubeadm_reset
+  become: yes
+
+- name: Join Kubernetes Cluster
+  shell: kubeadm join --ignore-preflight-errors=all --token {{ token }} {{ master_name }}:6443 --discovery-token-unsafe-skip-ca-verification
+  when: kubeadm_reset is succeeded
+  register: kubeadm_join
+  become: yes
+
+- name: Pass bridged IPv4 traffic to iptables' chains
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: 1
+    state: present
+  become: yes
+
+- name: Poke kubelet
+  systemd:
+    name: kubelet
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  register: kubelet_poke
+  become: yes

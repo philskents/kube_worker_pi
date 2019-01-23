@@ -1,0 +1,5 @@
+---
+
+- name: Configure kubernetes worker nodes
+  include: 'worker_config.yml'
+  tags: configure_worker
