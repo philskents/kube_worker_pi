@@ -6,16 +6,9 @@
   become: yes
 
 - name: Join Kubernetes Cluster
-  shell: kubeadm join --ignore-preflight-errors=all --token {{ token }} {{ master_name }}:6443 --discovery-token-unsafe-skip-ca-verification
+  shell: kubeadm join --ignore-preflight-errors=all --token {{ token }} {{ groups['kube_masters'][0] }}:6443 --discovery-token-unsafe-skip-ca-verification
   when: kubeadm_reset is succeeded
   register: kubeadm_join
-  become: yes
-
-- name: Pass bridged IPv4 traffic to iptables' chains
-  sysctl:
-    name: net.bridge.bridge-nf-call-iptables
-    value: 1
-    state: present
   become: yes
 
 - name: Poke kubelet
